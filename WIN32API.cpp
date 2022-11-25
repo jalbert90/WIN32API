@@ -1,34 +1,20 @@
 #include <Windows.h>
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WindowsProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+void OnSize(HWND hwnd, UINT flag, int width, int height);
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) 
-{
-	const wchar_t CLASS_NAME[] = L"My First Window Class";
+_Use_decl_annotations_ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmd, int nCmdShow) {
 
-	WNDCLASS wc = { 0 };
+	wchar_t CLASS_NAME[] = L"My first window class";
+	WNDCLASS wd = {};
+	wd.lpfnWndProc = WindowsProc;
+	wd.hInstance = hInstance;
+	wd.lpszClassName = CLASS_NAME;
 
-	wc.lpfnWndProc = WindowProc;
-	wc.hInstance = hInstance;
-	wc.lpszClassName = CLASS_NAME;
+	RegisterClass(&wd);
 
-	RegisterClass(&wc);
-
-	// Create a new instance of a window.
-	HWND hwnd = CreateWindowEx(
-		0,									// Optional window styles
-		CLASS_NAME,							// Window class
-		L"My first window instance!",		// Window text
-		WS_OVERLAPPEDWINDOW,				// Window style
-
-		// Size and position
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-
-		NULL,			// Parent
-		NULL,			// Menu
-		hInstance,		// Instance handle
-		NULL			// Additional app data
-	);
+	// Create window instance...
+	HWND hwnd = CreateWindowEx(0, CLASS_NAME, L"My first window instance", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
 
 	if (hwnd == NULL) {
 		return 0;
@@ -37,21 +23,33 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	ShowWindow(hwnd, nCmdShow);
 
 	MSG msg = {};
-	while (GetMessage(&msg, NULL, 0, 0) > 0) 
-	{
+	while (GetMessage(&msg, NULL, 0, 0) > 0) {
 		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DispatchMessageW(&msg);
+	}
+	
+
+	return 0;
+}
+
+LRESULT CALLBACK WindowsProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	switch (uMsg) {
+	case WM_SIZE:
+	{
+		int width = LOWORD(lParam);
+		int height = HIWORD(lParam);
+
+		OnSize(hwnd, (UINT)wParam, width, height);
+	}
+	break;
+	default:
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		break;
 	}
 
 	return 0;
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	switch (uMsg)
-	{
-	default:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-		break;
-	}
+void OnSize(HWND hwnd, UINT flag, int width, int height) {
+	//
 }
